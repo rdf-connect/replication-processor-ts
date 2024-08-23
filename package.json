@@ -1,0 +1,46 @@
+{
+  "name": "@rdfc/template-processor-ts",
+  "version": "0.0.0",
+  "description": "Template to kickstart the development of your next TypeScript processor.",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib/**/*",
+    "processor.ttl"
+  ],
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "test": "vitest run --coverage --coverage.include src",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rdf-connect/template-processor-ts"
+  },
+  "author": "Jens Pots",
+  "contributors": [
+    "Ieben Smessaert"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@rdfc/file-utils-processors-ts": "^0.5.4",
+    "@rdfc/js-runner": "^0.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "@vitest/coverage-v8": "^2.0.5",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.9",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.5.4",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^2.0.5"
+  },
+  "dependencies": {
+    "winston": "^3.14.2"
+  }
+}
