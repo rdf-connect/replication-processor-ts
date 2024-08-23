@@ -1,6 +1,7 @@
 # replication-processor-ts
 
-[![Build and tests with Node.js](https://github.com/rdf-connect/template-processor-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/template-processor-ts/actions/workflows/build-test.yml)
+[![Build and tests with Node.js](https://github.com/rdf-connect/replication-processor-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/replication-processor-ts/actions/workflows/build-test.yml)
+[![npm](https://img.shields.io/npm/v/@rdfc/replication-processor-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/replication-processor-ts)
 
 A processor for the RDF Connect framework that writes an incoming stream to disk and later reads it into the output stream.
 
