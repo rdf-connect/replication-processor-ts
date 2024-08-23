@@ -1,6 +1,6 @@
 {
   "name": "@rdfc/replication-processor-ts",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A processor for the RDF Connect framework that writes an incoming stream to disk and later reads it into the output stream.",
   "type": "module",
   "main": "lib/index.js",
