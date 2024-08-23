@@ -1,4 +1,4 @@
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 import { extractProcessors, extractSteps, Source } from "@rdfc/js-runner";
 
 const pipeline = `
@@ -19,13 +19,19 @@ const pipeline = `
         <incoming> a js:JsReaderChannel.
         <outgoing> a js:JsWriterChannel.
 
-        [ ] a js:Log;
+        [ ] a js:WriteReplication;
             js:incoming <incoming>;
-            js:outgoing <outgoing>.
+            js:append false;
+            js:savePath "test.json";
+            js:max 0.
+
+        [ ] a js:ReadReplication;
+            js:outgoing <outgoing>;
+            js:savePath "test.json".
     `;
 
 describe("processor", () => {
-    test("definition", async () => {
+    test("ReadReplication definition", async () => {
         expect.assertions(5);
 
         const source: Source = {
@@ -41,16 +47,51 @@ describe("processor", () => {
             shapes: config,
         } = await extractProcessors(source);
 
-        // Extract the Log processor.
-        const env = processors.find((x) => x.ty.value.endsWith("Log"))!;
+        // Extract the ReadReplication processor.
+        const env = processors.find((x) =>
+            x.ty.value.endsWith("ReadReplication"),
+        )!;
         expect(env).toBeDefined();
 
         const args = extractSteps(env, quads, config);
         expect(args.length).toBe(1);
         expect(args[0].length).toBe(2);
 
-        const [[incoming, outgoing]] = args;
-        expect(incoming.ty.id).toBe("https://w3id.org/conn/js#JsReaderChannel");
+        const [[outgoing, savePath]] = args;
         expect(outgoing.ty.id).toBe("https://w3id.org/conn/js#JsWriterChannel");
+        expect(savePath).toBe("test.json");
+    });
+
+    test("WriteReplication definition", async () => {
+        expect.assertions(7);
+
+        const source: Source = {
+            value: pipeline,
+            baseIRI: process.cwd() + "/config.ttl",
+            type: "memory",
+        };
+
+        // Parse pipeline into processors.
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
+
+        // Extract the WriteReplication processor.
+        const env = processors.find((x) =>
+            x.ty.value.endsWith("WriteReplication"),
+        )!;
+        expect(env).toBeDefined();
+
+        const args = extractSteps(env, quads, config);
+        expect(args.length).toBe(1);
+        expect(args[0].length).toBe(4);
+
+        const [[incoming, append, savePath, max]] = args;
+        expect(incoming.ty.id).toBe("https://w3id.org/conn/js#JsReaderChannel");
+        expect(append).toBe(false);
+        expect(savePath).toBe("test.json");
+        expect(max).toBe(0);
     });
 });

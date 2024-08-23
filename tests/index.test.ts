@@ -1,39 +1,63 @@
-import { log } from "../src";
+import { readReplication, writeReplication } from "../src";
 import { SimpleStream } from "@rdfc/js-runner";
-import { expect, describe, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
+import jsonfile from "jsonfile";
 
-describe("log", () => {
-    test("successful", async () => {
-        const consoleLog = vi.spyOn(console, "log");
-        expect.assertions(7);
+describe("replication-processor", () => {
+    test("ReadReplication", async () => {
+        const readFileMock = vi.spyOn(jsonfile, "readFile");
+        readFileMock.mockResolvedValue([
+            "Hello, World!",
+            "This is a second message",
+            "Goodbye.",
+        ]);
 
-        const incoming = new SimpleStream<string>();
         const outgoing = new SimpleStream<string>();
 
-        // We expect each one of the messages to have been logged.
-        outgoing.on("end", () => {
-            const calls = consoleLog.mock.calls;
-            expect(calls).toHaveLength(3);
-            expect(calls[0][0]).toBe("Hello, World!");
-            expect(calls[1][0]).toBe("This is a second message");
-            expect(calls[2][0]).toBe("Goodbye.");
-        });
+        const output: string[] = [];
+        const promise = new Promise<void>((resolve) => {
+            outgoing.on("data", (data) => {
+                output.push(data);
 
-        let index = 0;
-        outgoing.on("data", (data) => {
-            if (index == 0) {
-                expect(data).toBe("Hello, World!");
-            } else if (index == 1) {
-                expect(data).toBe("This is a second message");
-            } else {
-                expect(data).toBe("Goodbye.");
-            }
-            index += 1;
+                if (output.length === 3) {
+                    resolve();
+                }
+            });
         });
 
         // Initialize the processor.
-        const startLogging = log(incoming, outgoing);
-        await startLogging();
+        const startReadReplication = await readReplication(
+            outgoing,
+            "test.json",
+        );
+        await startReadReplication();
+
+        // Wait for the processor to finish.
+        await promise;
+
+        expect(output).toHaveLength(3);
+        expect(output[0]).toBe("Hello, World!");
+        expect(output[1]).toBe("This is a second message");
+        expect(output[2]).toBe("Goodbye.");
+
+        expect(readFileMock).toHaveBeenCalledTimes(1);
+        expect(readFileMock).toHaveBeenCalledWith("test.json");
+        readFileMock.mockRestore();
+    });
+
+    test("WriteReplication", async () => {
+        const writeFileMock = vi.spyOn(jsonfile, "writeFile");
+
+        const incoming = new SimpleStream<string>();
+
+        // Initialize the processor.
+        const startWriteReplication = writeReplication(
+            incoming,
+            false,
+            "test.json",
+            0,
+        );
+        await startWriteReplication();
 
         // Push all messages into the pipeline.
         await incoming.push("Hello, World!");
@@ -41,6 +65,13 @@ describe("log", () => {
         await incoming.push("Goodbye.");
 
         await incoming.end();
-        consoleLog.mockRestore();
+
+        expect(writeFileMock).toHaveBeenCalledTimes(1);
+        expect(writeFileMock).toHaveBeenCalledWith("test.json", [
+            "Hello, World!",
+            "This is a second message",
+            "Goodbye.",
+        ]);
+        writeFileMock.mockRestore();
     });
 });
