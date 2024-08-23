@@ -1,6 +1,6 @@
 import winston, { format, Logger } from "winston";
 
-const PROCESSOR_NAME = "template-processor-ts";
+const PROCESSOR_NAME = "replication-processor-ts";
 
 const consoleTransport = new winston.transports.Console();
 consoleTransport.level =

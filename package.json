@@ -1,7 +1,7 @@
 {
-  "name": "@rdfc/template-processor-ts",
+  "name": "@rdfc/replication-processor-ts",
   "version": "0.0.0",
-  "description": "Template to kickstart the development of your next TypeScript processor.",
+  "description": "A processor for the RDF Connect framework that writes an incoming stream to disk and later reads it into the output stream.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
@@ -15,16 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rdf-connect/template-processor-ts"
+    "url": "https://github.com/rdf-connect/replication-processor-ts"
   },
-  "author": "Jens Pots",
-  "contributors": [
-    "Ieben Smessaert"
-  ],
+  "author": "Ieben Smessaert",
   "license": "MIT",
   "devDependencies": {
     "@rdfc/file-utils-processors-ts": "^0.5.4",
     "@rdfc/js-runner": "^0.2.2",
+    "@rdfc/log-processor-ts": "^1.0.0",
+    "@types/jsonfile": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "^8.2.0",
     "@typescript-eslint/parser": "^8.2.0",
     "@vitest/coverage-v8": "^2.0.5",
@@ -41,6 +40,7 @@
     "vitest": "^2.0.5"
   },
   "dependencies": {
+    "jsonfile": "^6.1.0",
     "winston": "^3.14.2"
   }
 }

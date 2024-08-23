@@ -1,58 +1,96 @@
 import { Stream, Writer } from "@rdfc/js-runner";
 import { getLoggerFor } from "./utils/logUtil";
-
-const logger = getLoggerFor("log");
+import jsonfile from "jsonfile";
 
 /**
- * The logging function is a very simple processor which simply logs the
- * incoming stream to the console and pipes it directly into the outgoing
- * stream.
+ * The writeReplication function is a processor which simply writes the
+ * incoming stream to a JSON file on disk. This file can then be read by
+ * the readReplication processor to restore the data stream.
  *
- * @param incoming The data stream which must be logged.
- * @param outgoing The data stream into which the incoming stream is written.
+ * @param incoming The data stream which must be written to the JSON file.
+ * @param append Whether the data must be appended to the file or not. Default is false.
+ * @param savePath The path to the JSON file which must be written.
+ * @param max The maximum number of members to write to the file. If 0, all members are written. Default is 0.
  */
-export function log(
+export function writeReplication(
     incoming: Stream<string>,
-    outgoing: Writer<string>,
+    append: boolean = false,
+    savePath: string,
+    max: number = 0,
 ): () => Promise<void> {
-    /**************************************************************************
-     * This is where you set up your processor. This includes reading         *
-     * configuration files, initializing class instances, etc. You are        *
-     * guaranteed that no data will flow in the pipeline as long as your      *
-     * processor function has not returned here.                              *
-     *                                                                        *
-     * You must therefore initialize the data handlers, but you may not push  *
-     * any data into the pipeline here.                                       *
-     **************************************************************************/
+    const logger = getLoggerFor("WriteReplication");
 
-    incoming.on("data", (data) => {
-        outgoing
-            .push(data) // Push data into outgoing stream.
-            .then(() => console.log(data)) // Only print if successful.
-            .finally(); // Ignore any errors.
+    const members: string[] = [];
+    let count = 0;
+
+    incoming.on("data", async (data) => {
+        members.push(data);
+
+        count++;
+        if (max !== 0 && count >= max) {
+            logger.info(
+                `Reached maximum number of members (${max}). Closing stream.`,
+            );
+            await incoming.end();
+        }
     });
 
-    // If a processor upstream terminates the channel, we propagate this change
-    // onto the processors downstream.
-    incoming.on("end", () => {
-        outgoing
-            .end()
-            .then(() => logger.info("Incoming stream terminated."))
-            .finally();
+    // If a processor upstream terminates the channel, we write the data to the file.
+    incoming.on("end", async () => {
+        if (append) {
+            const previousMembers = (await jsonfile
+                .readFile(savePath)
+                .catch(() =>
+                    logger.error(`Could not read from file '${savePath}'.`),
+                )) as string[];
+            members.unshift(...previousMembers);
+        }
+        await jsonfile
+            .writeFile(savePath, members)
+            .catch(() =>
+                logger.error(`Could not write to file '${savePath}'.`),
+            );
+        logger.info(
+            `Written ${count} members to '${savePath}'. The file now contains ${members.length} members.`,
+        );
     });
 
-    /**************************************************************************
-     * Any code that must be executed after the pipeline goes online must be  *
-     * embedded in the returned function. This guarantees that all channels   *
-     * are initialized and the other processors are available. A common use   *
-     * case is the source processor, which introduces data into the pipeline  *
-     * from an external source such as the file system or an HTTP API, since  *
-     * these must be certain that the downstream processors are ready and     *
-     * awaiting data.                                                         *
-     *                                                                        *
-     * Note that this entirely optional, and you may return void instead.     *
-     **************************************************************************/
     return async () => {
-        // await outgoing.push("You're being logged. Do not resist.");
+        return;
+    };
+}
+
+/**
+ * The readReplication function is a processor which reads a JSON file on disk
+ * and writes the data to the outgoing stream. This function is the counterpart
+ * of the writeReplication function.
+ *
+ * @param outgoing The data stream into which the data from the JSON file is written.
+ * @param savePath The path to the JSON file which must be read.
+ */
+export async function readReplication(
+    outgoing: Writer<string>,
+    savePath: string,
+): Promise<() => Promise<void>> {
+    const logger = getLoggerFor("ReadReplication");
+
+    const members = (await jsonfile
+        .readFile(savePath)
+        .catch(() =>
+            logger.error(`Could not read from file '${savePath}'.`),
+        )) as string[];
+
+    return async () => {
+        // Push the data from the file into the outgoing stream.
+        for (const member of members) {
+            await outgoing.push(member);
+        }
+
+        logger.info(
+            `Pushed ${members.length} members to the outgoing stream. Closing stream.`,
+        );
+
+        // Close the outgoing stream to indicate that no more data will be pushed.
+        await outgoing.end();
     };
 }

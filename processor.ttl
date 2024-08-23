@@ -5,9 +5,10 @@
 @prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
-js:Log a js:JsProcess;
+### WriteReplication ###
+js:WriteReplication a js:JsProcess;
     js:file <./lib/index.js>;
-    js:function "log";
+    js:function "writeReplication";
     js:location <./>;
     js:mapping [
         a fno:Mapping;
@@ -17,13 +18,21 @@ js:Log a js:JsProcess;
             fnom:implementationParameterPosition "0"^^xsd:int;
         ], [
             a fnom:PositionParameterMapping;
-            fnom:functionParameter "outgoing";
+            fnom:functionParameter "append";
             fnom:implementationParameterPosition "1"^^xsd:int;
+        ], [
+            a fnom:PositionParameterMapping;
+            fnom:functionParameter "savePath";
+            fnom:implementationParameterPosition "2"^^xsd:int;
+        ], [
+            a fnom:PositionParameterMapping;
+            fnom:functionParameter "max";
+            fnom:implementationParameterPosition "3"^^xsd:int;
         ];
     ].
 
 [ ] a sh:NodeShape;
-    sh:targetClass js:Log;
+    sh:targetClass js:WriteReplication;
     sh:property [
         sh:class :ReaderChannel;
         sh:path js:incoming;
@@ -31,9 +40,56 @@ js:Log a js:JsProcess;
         sh:maxCount 1;
         sh:minCount 1;
     ], [
+        sh:datatype xsd:boolean;
+        sh:path js:append;
+        sh:name "append";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:string;
+        sh:path js:savePath;
+        sh:name "savePath";
+        sh:minCount 1;
+        sh:maxCount 1;
+    ], [
+        sh:datatype xsd:integer;
+        sh:path js:max;
+        sh:name "max";
+        sh:minCount 0;
+        sh:maxCount 1;
+    ].
+
+
+### ReadReplication ###
+js:ReadReplication a js:JsProcess;
+    js:file <./lib/index.js>;
+    js:function "readReplication";
+    js:location <./>;
+    js:mapping [
+        a fno:Mapping;
+        fno:parameterMapping [
+            a fnom:PositionParameterMapping;
+            fnom:functionParameter "outgoing";
+            fnom:implementationParameterPosition "0"^^xsd:int;
+        ], [
+            a fnom:PositionParameterMapping;
+            fnom:functionParameter "savePath";
+            fnom:implementationParameterPosition "1"^^xsd:int;
+        ];
+    ].
+
+[ ] a sh:NodeShape;
+    sh:targetClass js:ReadReplication;
+    sh:property [
         sh:class :WriterChannel;
         sh:path js:outgoing;
         sh:name "outgoing";
         sh:maxCount 1;
         sh:minCount 1;
+      ], [
+        sh:datatype xsd:string;
+        sh:path js:savePath;
+        sh:name "savePath";
+        sh:minCount 1;
+        sh:maxCount 1;
     ].

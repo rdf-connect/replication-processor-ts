@@ -12,16 +12,14 @@
     :reader <input/reader>;
     :writer <input/writer>.
 
-[ ] a :Channel;
-    :writer <outgoing>.
-<outgoing> a js:JsWriterChannel.
-
 [ ] a js:GlobRead;
     js:glob <./input.txt>;
     js:output <input/writer>;
     js:closeOnEnd true.
 
 
-[ ] a js:Log;
+[ ] a js:WriteReplication;
     js:incoming <input/reader>;
-    js:outgoing <outgoing>.
+    js:append true;
+    js:savePath <./replication-data.json>;
+    js:max 0.

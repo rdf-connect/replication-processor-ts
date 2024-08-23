@@ -1,0 +1,23 @@
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+
+<> owl:imports <../node_modules/@rdfc/js-runner/ontology.ttl>.
+<> owl:imports <../node_modules/@rdfc/file-utils-processors-ts/processors.ttl>.
+<> owl:imports <../node_modules/@rdfc/log-processor-ts/processor.ttl>.
+<> owl:imports <../processor.ttl>.
+
+<output/writer> a js:JsWriterChannel.
+<output/reader> a js:JsReaderChannel.
+[ ] a js:JsChannel;
+    :reader <output/reader>;
+    :writer <output/writer>.
+
+[ ] a js:Log;
+    js:incoming <output/reader>;
+    js:level "info";
+    js:label "output".
+
+[ ] a js:ReadReplication;
+    js:outgoing <output/writer>;
+    js:savePath <./replication-data.json>.

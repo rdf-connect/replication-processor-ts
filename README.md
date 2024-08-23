@@ -1,26 +1,34 @@
-# template-processor-ts
+# replication-processor-ts
 
 [![Build and tests with Node.js](https://github.com/rdf-connect/template-processor-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/template-processor-ts/actions/workflows/build-test.yml)
 
-This repository contains a fully functioning dummy implementation of a logging processor written in TypeScript, meant to be used as a template in order to kickstart the development of your next processor.
+A processor for the RDF Connect framework that writes an incoming stream to disk and later reads it into the output stream.
 
-## Features
+## Configuration
 
-At the time of writing, this repositories sets up the following boilerplate and tools for you.
+The `WriteReplication` processor can be configured using the following parameters:
 
-- Placeholder implementation of a processor which accepts input from a stream, logs it to the console, and pipes it back into the outgoing stream.
-- An initial `processor.ttl` file.
-- Vitest configuration unit testing, including GitHub Actions configuration.
-- Renovate notifications for dependency updates.
-- Convenient publishing to GitHub Packages for every new release.
-- ESLint/Prettier linting and styling, including a Husky git hook in combination with lint-staged.
-- The MIT license.
+- `incoming`: The data stream which must be written to the JSON file.
+- `append`: Whether the data must be appended to the file or not. Default is false.
+- `savePath`: The path to the JSON file which must be written.
+- `max`: The maximum number of members to write to the file. If 0, all members are written. Default is 0.
+
+The `ReadReplication` processor can be configured using the following parameters:
+
+- `outgoing`: The data stream into which the data from the JSON file is written.
+- `savePath`: The path to the JSON file which must be read.
 
 ## Installation
 
 ```
 npm install
 npm run build
+```
+
+Or install from NPM:
+
+```bash
+npm install @rdfc/replication-processor-ts
 ```
 
 ## Example
@@ -30,11 +38,13 @@ An example configuration of the processor can be found in the `example` director
 You can run this example by executing the following command:
 
 ```bash
-npx js-runner example/pipeline.ttl
+npx js-runner example/write-pipeline.ttl
+npx js-runner example/read-pipeline.ttl
 ```
 
 To enable all debug logs, add `DEBUG=*` before the command:
 
 ```bash
-DEBUG=* npx js-runner example/pipeline.ttl
+DEBUG=* npx js-runner example/write-pipeline.ttl
+DEBUG=* npx js-runner example/read-pipeline.ttl
 ```
