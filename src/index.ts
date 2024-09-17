@@ -78,12 +78,13 @@ export async function readReplication(
     const logger = getLoggerFor("ReadReplication");
 
     const fileStream = createReadStream(savePath);
-    const reader = createInterface({
-        input: fileStream,
-        crlfDelay: Infinity,
-    });
 
     return async () => {
+        const reader = createInterface({
+            input: fileStream,
+            crlfDelay: Infinity,
+        });
+
         let count = 0;
         // Push the data from the file into the outgoing stream.
         for await (const member of reader) {
