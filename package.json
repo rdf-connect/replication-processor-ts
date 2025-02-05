@@ -24,9 +24,9 @@
     "@rdfc/js-runner": "^0.2.2",
     "@rdfc/log-processor-ts": "^1.0.0",
     "@types/jsonfile": "^6.1.4",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
-    "@vitest/coverage-v8": "^2.1.8",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "dotenv": "^16.4.7",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -37,7 +37,7 @@
     "tsc-alias": "^1.8.10",
     "typescript": "^5.7.3",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "dependencies": {
     "winston": "^3.17.0"
