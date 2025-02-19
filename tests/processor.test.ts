@@ -58,7 +58,9 @@ describe("processor", () => {
         expect(args[0].length).toBe(2);
 
         const [[outgoing, savePath]] = args;
-        expect(outgoing.ty.id).toBe("https://w3id.org/conn/js#JsWriterChannel");
+        expect(outgoing.ty.value).toBe(
+            "https://w3id.org/conn/js#JsWriterChannel",
+        );
         expect(savePath).toBe("test.json");
     });
 
@@ -89,7 +91,9 @@ describe("processor", () => {
         expect(args[0].length).toBe(4);
 
         const [[incoming, append, savePath, max]] = args;
-        expect(incoming.ty.id).toBe("https://w3id.org/conn/js#JsReaderChannel");
+        expect(incoming.ty.value).toBe(
+            "https://w3id.org/conn/js#JsReaderChannel",
+        );
         expect(append).toBe(false);
         expect(savePath).toBe("test.json");
         expect(max).toBe(0);
