@@ -1,16 +1,12 @@
+// vitest.config.ts
 import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-    plugins: [tsconfigPaths()],
     test: {
-        deps: {
-            optimizer: {
-                ssr: {
-                    enabled: true,
-                    include: ["@rdfc/js-runner"],
-                },
-            },
-        },
+        environment: "node",
+    },
+    ssr: {
+        // Needed to fix mocking of 'node:fs' in tests
+        noExternal: ["@rdfc/js-runner"],
     },
 });
