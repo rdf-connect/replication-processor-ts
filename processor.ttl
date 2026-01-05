@@ -1,59 +1,38 @@
-@prefix js: <https://w3id.org/conn/js#>.
-@prefix fno: <https://w3id.org/function/ontology#>.
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
 ### WriteReplication ###
-js:WriteReplication a js:JsProcess;
-    js:file <./lib/index.js>;
-    js:function "writeReplication";
-    js:location <./>;
-    js:mapping [
-        a fno:Mapping;
-        fno:parameterMapping [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "incoming";
-            fnom:implementationParameterPosition "0"^^xsd:int;
-        ], [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "append";
-            fnom:implementationParameterPosition "1"^^xsd:int;
-        ], [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "savePath";
-            fnom:implementationParameterPosition "2"^^xsd:int;
-        ], [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "max";
-            fnom:implementationParameterPosition "3"^^xsd:int;
-        ];
-    ].
+rdfc:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
+    rdfc:file <./lib/index.js>;
+    rdfc:class "WriteReplication";
+    rdfc:entrypoint <./>.
 
 [ ] a sh:NodeShape;
-    sh:targetClass js:WriteReplication;
+    sh:targetClass rdfc:WriteReplication;
     sh:property [
-        sh:class :ReaderChannel;
-        sh:path js:incoming;
+        sh:class rdfc:Reader;
+        sh:path rdfc:incoming;
         sh:name "incoming";
         sh:maxCount 1;
         sh:minCount 1;
     ], [
         sh:datatype xsd:boolean;
-        sh:path js:append;
+        sh:path rdfc:append;
         sh:name "append";
         sh:minCount 0;
         sh:maxCount 1;
     ], [
         sh:datatype xsd:string;
-        sh:path js:savePath;
+        sh:path rdfc:savePath;
         sh:name "savePath";
         sh:minCount 1;
         sh:maxCount 1;
     ], [
         sh:datatype xsd:integer;
-        sh:path js:max;
+        sh:path rdfc:max;
         sh:name "max";
         sh:minCount 0;
         sh:maxCount 1;
@@ -61,34 +40,22 @@ js:WriteReplication a js:JsProcess;
 
 
 ### ReadReplication ###
-js:ReadReplication a js:JsProcess;
-    js:file <./lib/index.js>;
-    js:function "readReplication";
-    js:location <./>;
-    js:mapping [
-        a fno:Mapping;
-        fno:parameterMapping [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "outgoing";
-            fnom:implementationParameterPosition "0"^^xsd:int;
-        ], [
-            a fnom:PositionParameterMapping;
-            fnom:functionParameter "savePath";
-            fnom:implementationParameterPosition "1"^^xsd:int;
-        ];
-    ].
+rdfc:ReadReplication rdfc:jsImplementationOf rdfc:Processor;
+    rdfc:file <./lib/index.js>;
+    rdfc:class "ReadReplication";
+    rdfc:entrypoint <./>.
 
 [ ] a sh:NodeShape;
-    sh:targetClass js:ReadReplication;
+    sh:targetClass rdfc:ReadReplication;
     sh:property [
-        sh:class :WriterChannel;
-        sh:path js:outgoing;
+        sh:class rdfc:Writer;
+        sh:path rdfc:outgoing;
         sh:name "outgoing";
         sh:maxCount 1;
         sh:minCount 1;
       ], [
         sh:datatype xsd:string;
-        sh:path js:savePath;
+        sh:path rdfc:savePath;
         sh:name "savePath";
         sh:minCount 1;
         sh:maxCount 1;

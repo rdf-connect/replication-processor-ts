@@ -1,23 +1,29 @@
-@prefix js: <https://w3id.org/conn/js#>.
-@prefix : <https://w3id.org/conn#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 
-<> owl:imports <../node_modules/@rdfc/js-runner/ontology.ttl>.
-<> owl:imports <../node_modules/@rdfc/file-utils-processors-ts/processors.ttl>.
-<> owl:imports <../node_modules/@rdfc/log-processor-ts/processor.ttl>.
+### Import runners and processors
+<> owl:imports <./node_modules/@rdfc/js-runner/index.ttl>.
+
+<> owl:imports <./node_modules/@rdfc/file-utils-processors-ts/processors.ttl>.
+<> owl:imports <./node_modules/@rdfc/log-processor-ts/processor.ttl>.
 <> owl:imports <../processor.ttl>.
 
-<output/writer> a js:JsWriterChannel.
-<output/reader> a js:JsReaderChannel.
-[ ] a js:JsChannel;
-    :reader <output/reader>;
-    :writer <output/writer>.
+### Define the channels
+<output> a rdfc:Reader, rdfc:Writer.
 
-[ ] a js:Log;
-    js:incoming <output/reader>;
-    js:level "info";
-    js:label "output".
+### Define the pipeline
+<> a rdfc:Pipeline;
+   rdfc:consistsOf [
+       rdfc:instantiates rdfc:NodeRunner;
+       rdfc:processor <reader>, <logger>;
+   ].
 
-[ ] a js:ReadReplication;
-    js:outgoing <output/writer>;
-    js:savePath <./replication-data.json>.
+### Define the processors
+<reader> a rdfc:ReadReplication;
+    rdfc:outgoing <output>;
+    rdfc:savePath <./replication-data.txt>.
+
+<logger> a rdfc:LogProcessorJs;
+    rdfc:reader <output>;
+    rdfc:level "info";
+    rdfc:label "output".

@@ -1,101 +1,89 @@
-import { describe, expect, test } from "vitest";
-import { extractProcessors, extractSteps, Source } from "@rdfc/js-runner";
+import { Readable } from "stream";
+import { describe, expect, test, vi } from "vitest";
+import type {
+    ReadReplication,
+    ReadReplicationArgs,
+    WriteReplication,
+    WriteReplicationArgs,
+} from "../src";
+import { resolve } from "path";
+import { ProcHelper } from "@rdfc/js-runner/lib/testUtils";
+
+vi.mock("node:fs", async () => {
+    const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
+
+    return {
+        ...actual,
+        createReadStream: vi.fn(
+            () =>
+                // Simulate a file with three lines of text
+                Readable.from([
+                    '"Hello, World!"\n',
+                    '"This is a second message"\n',
+                    '"Goodbye."\n',
+                ]) as unknown,
+        ),
+        createWriteStream: vi.fn(),
+    };
+});
 
 const pipeline = `
-        @prefix js: <https://w3id.org/conn/js#>.
-        @prefix ws: <https://w3id.org/conn/ws#>.
-        @prefix : <https://w3id.org/conn#>.
-        @prefix owl: <http://www.w3.org/2002/07/owl#>.
-        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-        @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-        <> owl:imports <./node_modules/@rdfc/js-runner/ontology.ttl>, <./processor.ttl>.
+        <http://example.org/writer> a rdfc:WriteReplication;
+            rdfc:incoming <incoming>;
+            rdfc:append false;
+            rdfc:savePath "test.txt";
+            rdfc:max 0.
 
-        [ ] a :Channel;
-            :reader <incoming>.
-        [ ] a :Channel;
-            :writer <outgoing>.
-        <incoming> a js:JsReaderChannel.
-        <outgoing> a js:JsWriterChannel.
-
-        [ ] a js:WriteReplication;
-            js:incoming <incoming>;
-            js:append false;
-            js:savePath "test.json";
-            js:max 0.
-
-        [ ] a js:ReadReplication;
-            js:outgoing <outgoing>;
-            js:savePath "test.json".
+        <http://example.org/reader> a rdfc:ReadReplication;
+            rdfc:outgoing <outgoing>;
+            rdfc:savePath "test.txt".
     `;
 
 describe("processor", () => {
     test("ReadReplication definition", async () => {
-        expect.assertions(5);
+        const helper = new ProcHelper<ReadReplication>();
 
-        const source: Source = {
-            value: pipeline,
-            baseIRI: process.cwd() + "/config.ttl",
-            type: "memory",
-        };
+        await helper.importFile(resolve("./processor.ttl"));
+        await helper.importInline(resolve("./pipeline.ttl"), pipeline);
 
-        // Parse pipeline into processors.
-        const {
-            processors,
-            quads,
-            shapes: config,
-        } = await extractProcessors(source);
+        const config = helper.getConfig("ReadReplication");
 
-        // Extract the ReadReplication processor.
-        const env = processors.find((x) =>
-            x.ty.value.endsWith("ReadReplication"),
-        )!;
-        expect(env).toBeDefined();
+        expect(config.location).toBeDefined();
+        expect(config.clazz).toBe("ReadReplication");
+        expect(config.file).toBeDefined();
 
-        const args = extractSteps(env, quads, config);
-        expect(args.length).toBe(1);
-        expect(args[0].length).toBe(2);
-
-        const [[outgoing, savePath]] = args;
-        expect(outgoing.ty.value).toBe(
-            "https://w3id.org/conn/js#JsWriterChannel",
+        const proc = <ReadReplication & ReadReplicationArgs>(
+            await helper.getProcessor("http://example.org/reader")
         );
-        expect(savePath).toBe("test.json");
+
+        expect(proc.outgoing.constructor.name).toBe("WriterInstance");
+        expect(proc.savePath).toBe("test.txt");
+
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Wait a bit for the reading to complete
     });
 
     test("WriteReplication definition", async () => {
-        expect.assertions(7);
+        const { ProcHelper } = await import("@rdfc/js-runner/lib/testUtils");
+        const helper = new ProcHelper<WriteReplication>();
 
-        const source: Source = {
-            value: pipeline,
-            baseIRI: process.cwd() + "/config.ttl",
-            type: "memory",
-        };
+        await helper.importFile(resolve("./processor.ttl"));
+        await helper.importInline(resolve("./pipeline.ttl"), pipeline);
 
-        // Parse pipeline into processors.
-        const {
-            processors,
-            quads,
-            shapes: config,
-        } = await extractProcessors(source);
+        const config = helper.getConfig("WriteReplication");
 
-        // Extract the WriteReplication processor.
-        const env = processors.find((x) =>
-            x.ty.value.endsWith("WriteReplication"),
-        )!;
-        expect(env).toBeDefined();
+        expect(config.location).toBeDefined();
+        expect(config.clazz).toBe("WriteReplication");
+        expect(config.file).toBeDefined();
 
-        const args = extractSteps(env, quads, config);
-        expect(args.length).toBe(1);
-        expect(args[0].length).toBe(4);
-
-        const [[incoming, append, savePath, max]] = args;
-        expect(incoming.ty.value).toBe(
-            "https://w3id.org/conn/js#JsReaderChannel",
+        const proc = <WriteReplication & WriteReplicationArgs>(
+            await helper.getProcessor("http://example.org/writer")
         );
-        expect(append).toBe(false);
-        expect(savePath).toBe("test.json");
-        expect(max).toBe(0);
+
+        expect(proc.incoming.constructor.name).toBe("ReaderInstance");
+        expect(proc.append).toBe(false);
+        expect(proc.savePath).toBe("test.txt");
+        expect(proc.max).toBe(0);
     });
 });
