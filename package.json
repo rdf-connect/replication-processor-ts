@@ -26,18 +26,15 @@
     "@typescript-eslint/parser": "^8.53.1",
     "@vitest/coverage-v8": "^4.0.17",
     "dotenv": "^17.2.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.0.4",
     "vitest": "^4.0.17"
-  },
-  "dependencies": {
-    "winston": "^3.19.0"
   }
 }
