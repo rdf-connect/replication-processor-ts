@@ -1,7 +1,7 @@
 {
   "name": "@rdfc/replication-processor-ts",
   "version": "1.1.1",
-  "description": "A processor for the RDF Connect framework that writes an incoming stream to disk and later reads it into the output stream.",
+  "description": "A processor for the RDF-Connect framework that writes an incoming stream to disk and later reads it into the output stream.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
@@ -20,9 +20,7 @@
   "author": "Ieben Smessaert",
   "license": "MIT",
   "devDependencies": {
-    "@rdfc/file-utils-processors-ts": "^0.6.0",
-    "@rdfc/js-runner": "^1.0.0",
-    "@rdfc/log-processor-ts": "^1.0.0",
+    "@rdfc/js-runner": "^3.0.1",
     "@types/jsonfile": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",

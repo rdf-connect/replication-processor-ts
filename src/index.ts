@@ -1,66 +1,72 @@
-import { Stream, Writer } from "@rdfc/js-runner";
-import { getLoggerFor } from "./utils/logUtil";
-import { createReadStream, createWriteStream } from "node:fs";
+import { Processor, Reader, Writer } from "@rdfc/js-runner";
+import { createReadStream, createWriteStream, type WriteStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
 
 /**
- * The writeReplication function is a processor which simply writes the
+ * The WriteReplication processor is a processor which simply writes the
  * incoming stream to a text file on disk. This file can then be read by
- * the readReplication processor to restore the data stream.
+ * the ReadReplication processor to restore the data stream.
  *
  * @param incoming The data stream which must be written to the text file.
  * @param append Whether the data must be appended to the file or not. Default is false.
  * @param savePath The path to the text file which must be written.
  * @param max The maximum number of members to write to the file. If 0, all members are written. Default is 0.
  */
-export function writeReplication(
-    incoming: Stream<string>,
-    append: boolean = false,
-    savePath: string,
-    max: number = 0,
-): () => Promise<void> {
-    const logger = getLoggerFor("WriteReplication");
+export type WriteReplicationArgs = {
+    incoming: Reader;
+    append?: boolean;
+    savePath: string;
+    max?: number;
+};
 
-    // Create writer to write per line to file
-    const writer = createWriteStream(savePath, { flags: append ? "a" : "w" });
+export class WriteReplication extends Processor<WriteReplicationArgs> {
+    private writer: WriteStream;
+    private count: number = 0;
 
-    let count = 0;
-
-    incoming.on("data", async (data) => {
-        const ready = writer.write(JSON.stringify(data) + "\n");
-        if (!ready) {
-            logger.verbose("Write buffer full, waiting for drain...");
-            await once(writer, "drain");
-        }
-
-        count++;
-
-        if (count % 1000 === 0) {
-            logger.verbose(
-                `Already written ${count} members to '${savePath}'...`,
-            );
-        }
-
-        if (max !== 0 && count >= max) {
-            logger.info(
-                `Reached maximum number of members (${max}). Closing stream.`,
-            );
-            await incoming.end();
-        }
-    });
-
-    // If a processor upstream terminates the channel, we write the data to the file.
-    incoming.on("end", async () => {
-        writer.end();
-        logger.info(
-            `Written ${count} members to '${savePath}'. Closing stream.`,
+    async init(this: WriteReplicationArgs & this): Promise<void> {
+        this.writer = createWriteStream(
+            this.savePath.replace(/^file:\/\//, ""),
+            { flags: this.append ? "a" : "w" },
         );
-    });
+        this.max ??= 0;
+    }
 
-    return async () => {
-        return;
-    };
+    async transform(this: WriteReplicationArgs & this): Promise<void> {
+        for await (const data of this.incoming.strings()) {
+            // TODO: remove this workaround when we can close the reader stream.
+            if (this.max && this.count >= this.max) {
+                // As we cannot close the reader stream yet, we just skip further processing, but consume the data.
+                continue;
+            }
+
+            const ready = this.writer.write(JSON.stringify(data) + "\n");
+            if (!ready) {
+                this.logger.verbose("Write buffer full, waiting for drain...");
+                await once(this.writer, "drain");
+            }
+
+            this.count++;
+
+            if (this.count % 1000 === 0) {
+                this.logger.verbose(
+                    `Already written ${this.count} members to '${this.savePath}'...`,
+                );
+            }
+
+            if (this.max && this.count >= this.max) {
+                this.logger.info(
+                    `Reached maximum number of members (${this.max}). (Not) Closing stream.`,
+                );
+                // TODO: we want to close the reader, but this is currently not supported anymore in v2.
+                // await this.incoming.end();
+            }
+        }
+    }
+
+    async produce(this: WriteReplicationArgs & this): Promise<void> {
+        // nothing
+    }
 }
 
 /**
@@ -71,38 +77,57 @@ export function writeReplication(
  * @param outgoing The data stream into which the data from the text file is written.
  * @param savePath The path to the text file which must be read.
  */
-export async function readReplication(
-    outgoing: Writer<string>,
-    savePath: string,
-): Promise<() => Promise<void>> {
-    const logger = getLoggerFor("ReadReplication");
+export type ReadReplicationArgs = {
+    outgoing: Writer;
+    savePath: string;
+};
 
-    const fileStream = createReadStream(savePath);
+export class ReadReplication extends Processor<ReadReplicationArgs> {
+    private fileStream: ReturnType<typeof createReadStream>;
+    private count: number;
 
-    return async () => {
+    async init(this: ReadReplicationArgs & this): Promise<void> {
+        this.fileStream = createReadStream(
+            this.savePath.replace(/^file:\/\//, ""),
+        );
+        this.count = 0;
+        this.logger.info(
+            `Initialized ReadReplication from file '${this.savePath}'.`,
+        );
+    }
+
+    async transform(this: ReadReplicationArgs & this): Promise<void> {
+        // nothing
+    }
+
+    async produce(this: ReadReplicationArgs & this): Promise<void> {
+        this.logger.info(
+            `Producing members from file '${this.savePath}' to outgoing stream...`,
+        );
         const reader = createInterface({
-            input: fileStream,
+            input: this.fileStream,
             crlfDelay: Infinity,
         });
-
-        let count = 0;
-        // Push the data from the file into the outgoing stream.
+        this.logger.info(
+            `Starting to push members from file '${this.savePath}' to outgoing stream...`,
+        );
         for await (const member of reader) {
-            await outgoing.push(JSON.parse(member));
-            count++;
+            this.logger.info(member);
+            await this.outgoing.string(JSON.parse(member));
+            this.count++;
 
-            if (count % 1000 === 0) {
-                logger.verbose(
-                    `Already pushed ${count} members to the outgoing stream...`,
+            if (this.count % 1000 === 0) {
+                this.logger.verbose(
+                    `Already pushed ${this.count} members to the outgoing stream...`,
                 );
             }
         }
 
-        logger.info(
-            `Pushed ${count} members to the outgoing stream. Closing stream.`,
+        this.logger.info(
+            `Pushed ${this.count} members to the outgoing stream. Closing stream.`,
         );
 
         // Close the outgoing stream to indicate that no more data will be pushed.
-        await outgoing.end();
-    };
+        await this.outgoing.close();
+    }
 }

@@ -1,61 +1,62 @@
-import { readReplication, writeReplication } from "../src";
-import { SimpleStream } from "@rdfc/js-runner";
+import { ReadReplication, WriteReplication } from "../src";
+import { FullProc } from "@rdfc/js-runner";
+import { channel, createRunner } from "@rdfc/js-runner/lib/testUtils";
 import { describe, expect, test, vi } from "vitest";
 import * as fs from "fs";
-import * as readline from "readline";
+import { createLogger } from "winston";
+import { Readable } from "stream";
 
-vi.mock("fs");
-vi.mock("readline");
-vi.mock("events");
+vi.mock("node:fs", async () => {
+    const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
+
+    return {
+        ...actual,
+        createReadStream: vi.fn(
+            () =>
+                // Simulate a file with three lines of text
+                Readable.from([
+                    '"Hello, World!"\n',
+                    '"This is a second message"\n',
+                    '"Goodbye."\n',
+                ]) as unknown,
+        ),
+        createWriteStream: vi.fn(),
+    };
+});
 
 describe("replication-processor", () => {
     test("ReadReplication", async () => {
-        const mockedReadStream = fs.createReadStream("test.json");
-        vi.mocked(readline.createInterface).mockReturnValue({
-            // Mocking the async iterator
-            [Symbol.asyncIterator]: vi.fn().mockReturnValue({
-                next: vi
-                    .fn()
-                    .mockResolvedValueOnce({
-                        // eslint-disable-next-line
-                        value: '"Hello, World!"',
-                        done: false,
-                    })
-                    .mockResolvedValueOnce({
-                        // eslint-disable-next-line
-                        value: '"This is a second message"',
-                        done: false,
-                    })
-                    // eslint-disable-next-line
-                    .mockResolvedValueOnce({ value: '"Goodbye."', done: false })
-                    .mockResolvedValueOnce({ done: true }), // Signals the end of the stream
-            }),
-            on: vi.fn(),
-            close: vi.fn(),
-        } as unknown as readline.Interface);
-
-        const outgoing = new SimpleStream<string>();
+        const runner = createRunner();
+        const [outgoingWriter, outgoingReader] = channel(runner, "outgoing");
 
         const output: string[] = [];
-        const promise = new Promise<void>((resolve) => {
-            outgoing.on("data", (data) => {
+        (async () => {
+            for await (const data of outgoingReader.strings()) {
                 output.push(data);
-
-                if (output.length === 3) {
-                    resolve();
-                }
-            });
-        });
+            }
+        })().then();
 
         // Initialize the processor.
-        const startReadReplication = await readReplication(
-            outgoing,
-            "test.json",
+        const startReadReplication = <FullProc<ReadReplication>>(
+            new ReadReplication(
+                {
+                    outgoing: outgoingWriter,
+                    savePath: "test.txt",
+                },
+                createLogger(),
+            )
         );
-        await startReadReplication();
+        await startReadReplication.init();
+
+        const outputPromise = Promise.all([
+            startReadReplication.transform(),
+            startReadReplication.produce(),
+        ]);
+
+        // Nothing to push, as ReadReplication reads from file.
 
         // Wait for the processor to finish.
-        await promise;
+        await outputPromise;
 
         // Assertions
         expect(output).toHaveLength(3);
@@ -63,11 +64,7 @@ describe("replication-processor", () => {
         expect(output[1]).toBe("This is a second message");
         expect(output[2]).toBe("Goodbye.");
 
-        expect(readline.createInterface).toHaveBeenCalledTimes(1);
-        expect(readline.createInterface).toHaveBeenCalledWith({
-            input: mockedReadStream,
-            crlfDelay: Infinity,
-        });
+        expect(fs.createReadStream).toHaveBeenCalledTimes(1);
     });
 
     test("WriteReplication", async () => {
@@ -80,22 +77,38 @@ describe("replication-processor", () => {
             }),
             end: vi.fn(),
         });
-        const incoming = new SimpleStream<string>();
+
+        const runner = createRunner();
+        const [incomingWriter, incomingReader] = channel(runner, "incoming");
 
         // Initialize the processor.
-        const startWriteReplication = writeReplication(
-            incoming,
-            false,
-            "test.json",
-            0,
+        const startWriteReplication = <FullProc<WriteReplication>>(
+            new WriteReplication(
+                {
+                    incoming: incomingReader,
+                    append: false,
+                    savePath: "test.txt",
+                    max: 0,
+                },
+                createLogger(),
+            )
         );
-        await startWriteReplication();
+        await startWriteReplication.init();
+
+        const outputPromise = Promise.all([
+            startWriteReplication.transform(),
+            startWriteReplication.produce(),
+        ]);
 
         // Push all messages into the pipeline.
-        await incoming.push("Hello, World!");
-        await incoming.push("This is a second message");
-        await incoming.push("Goodbye.");
-        await incoming.end();
+        await incomingWriter.string("Hello, World!");
+        await incomingWriter.string("This is a second message");
+        await incomingWriter.string("Goodbye.");
+
+        await incomingWriter.close();
+
+        // Wait for the processor to finish.
+        await outputPromise;
 
         // Assertions
         expect(written).toHaveLength(3);
@@ -104,7 +117,7 @@ describe("replication-processor", () => {
         expect(written[2]).toBe('"Goodbye."\n');
 
         expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
-        expect(fs.createWriteStream).toHaveBeenCalledWith("test.json", {
+        expect(fs.createWriteStream).toHaveBeenCalledWith("test.txt", {
             flags: "w",
         });
     });
