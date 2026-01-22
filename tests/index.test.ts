@@ -30,15 +30,9 @@ describe("replication-processor", () => {
         const [outgoingWriter, outgoingReader] = channel(runner, "outgoing");
 
         const output: string[] = [];
-        let resolve: (v: void) => void = () => {};
-        const promise = new Promise((res) => (resolve = res));
         (async () => {
             for await (const data of outgoingReader.strings()) {
                 output.push(data);
-
-                if (output.length === 3) {
-                    resolve();
-                }
             }
         })().then();
 
@@ -62,7 +56,6 @@ describe("replication-processor", () => {
         // Nothing to push, as ReadReplication reads from file.
 
         // Wait for the processor to finish.
-        await promise;
         await outputPromise;
 
         // Assertions
