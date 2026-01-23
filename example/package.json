@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@rdfc/replication-processor-ts": "file:..",
-    "@rdfc/file-utils-processors-ts": "^1.0.2",
+    "@rdfc/file-utils-processors-ts": "^1.0.3",
     "@rdfc/js-runner": "^3.0.1",
     "@rdfc/log-processor-ts": "^2.0.3",
     "@rdfc/orchestrator-js": "^2.0.1"
