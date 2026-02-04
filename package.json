@@ -20,7 +20,7 @@
   "author": "Ieben Smessaert",
   "license": "MIT",
   "devDependencies": {
-    "@rdfc/js-runner": "^3.0.1",
+    "@rdfc/js-runner": "^3.0.2",
     "@types/jsonfile": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
