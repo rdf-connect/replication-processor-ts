@@ -34,12 +34,6 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
 
     async transform(this: WriteReplicationArgs & this): Promise<void> {
         for await (const data of this.incoming.strings()) {
-            // TODO: remove this workaround when we can close the reader stream.
-            if (this.max && this.count >= this.max) {
-                // As we cannot close the reader stream yet, we just skip further processing, but consume the data.
-                continue;
-            }
-
             const ready = this.writer.write(JSON.stringify(data) + "\n");
             if (!ready) {
                 this.logger.verbose("Write buffer full, waiting for drain...");
@@ -58,8 +52,7 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
                 this.logger.info(
                     `Reached maximum number of members (${this.max}). (Not) Closing stream.`,
                 );
-                // TODO: we want to close the reader, but this is currently not supported anymore in v2.
-                // await this.incoming.end();
+                await this.incoming.cancel();
             }
         }
     }
