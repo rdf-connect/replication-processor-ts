@@ -15,25 +15,33 @@ rdfc:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
     sh:property [
         sh:class rdfc:Reader;
         sh:path rdfc:incoming;
-        sh:name "incoming";
+        sh:codeIdentifier "incoming";
+        sh:name "Incoming stream";
+        sh:description "Reader channel IRI that provides the data stream to be written to the text file.";
         sh:maxCount 1;
         sh:minCount 1;
     ], [
         sh:datatype xsd:boolean;
         sh:path rdfc:append;
-        sh:name "append";
+        sh:codeIdentifier "append";
+        sh:name "Append";
+        sh:description "Whether to append new replication data to the file. Set to true to append, false (or omitted) to overwrite/create new file.";
         sh:minCount 0;
         sh:maxCount 1;
     ], [
         sh:datatype xsd:string;
         sh:path rdfc:savePath;
-        sh:name "savePath";
+        sh:codeIdentifier "savePath";
+        sh:name "Save path";
+        sh:description "Filesystem path where the processor should save output data (e.g. /tmp/output.replication).";
         sh:minCount 1;
         sh:maxCount 1;
     ], [
         sh:datatype xsd:integer;
         sh:path rdfc:max;
-        sh:name "max";
+        sh:codeIdentifier "max";
+        sh:name "Max records";
+        sh:description "Optional integer limit for the maximum number of members to write to the file. If 0, all members are written. Default is 0.";
         sh:minCount 0;
         sh:maxCount 1;
     ].
@@ -50,13 +58,17 @@ rdfc:ReadReplication rdfc:jsImplementationOf rdfc:Processor;
     sh:property [
         sh:class rdfc:Writer;
         sh:path rdfc:outgoing;
-        sh:name "outgoing";
+        sh:codeIdentifier "outgoing";
+        sh:name "Outgoing stream";
+        sh:description "Writer channel IRI to which the data from the text file is written.";
         sh:maxCount 1;
         sh:minCount 1;
       ], [
         sh:datatype xsd:string;
         sh:path rdfc:savePath;
-        sh:name "savePath";
+        sh:codeIdentifier "savePath";
+        sh:name "Save path";
+        sh:description "Filesystem path where the processor should read from.";
         sh:minCount 1;
         sh:maxCount 1;
     ].
