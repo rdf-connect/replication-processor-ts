@@ -14,7 +14,7 @@
     "@rdfc/file-utils-processors-ts": "^1.0.3",
     "@rdfc/js-runner": "^3.0.3",
     "@rdfc/log-processor-ts": "^2.0.3",
-    "@rdfc/orchestrator-js": "^2.0.2"
+    "@rdfc/orchestrator-js": "^2.1.0"
   },
   "description": ""
 }
