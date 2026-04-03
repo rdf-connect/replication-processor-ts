@@ -8,6 +8,8 @@
 rdfc:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
     rdfc:file <./lib/index.js>;
     rdfc:class "WriteReplication";
+    rdfs:label "Write Replication Processor";
+    rdfs:comment "Processor that writes data from an incoming Reader channel to a text file on the filesystem.";
     rdfc:entrypoint <./>.
 
 [ ] a sh:NodeShape;
@@ -51,6 +53,8 @@ rdfc:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
 rdfc:ReadReplication rdfc:jsImplementationOf rdfc:Processor;
     rdfc:file <./lib/index.js>;
     rdfc:class "ReadReplication";
+    rdfs:label "Read Replication Processor";
+    rdfs:comment "Processor that reads data from a filesystem text file and writes it to an outgoing Writer channel.";
     rdfc:entrypoint <./>.
 
 [ ] a sh:NodeShape;
