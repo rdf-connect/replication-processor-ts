@@ -26,7 +26,7 @@
     "@types/jsonfile": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
-    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.5",
     "dotenv": "^17.4.2",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
@@ -38,6 +38,6 @@
     "tsc-alias": "^1.8.16",
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.5"
   }
 }
