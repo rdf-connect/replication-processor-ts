@@ -15,9 +15,9 @@ import { once } from "node:events";
  */
 export type WriteReplicationArgs = {
     incoming: Reader;
-    append?: boolean;
+    append: boolean;
     savePath: string;
-    max?: number;
+    max: number;
 };
 
 export class WriteReplication extends Processor<WriteReplicationArgs> {
@@ -29,7 +29,6 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
             this.savePath.replace(/^file:\/\//, ""),
             { flags: this.append ? "a" : "w" },
         );
-        this.max ??= 0;
     }
 
     async transform(this: WriteReplicationArgs & this): Promise<void> {

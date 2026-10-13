@@ -86,4 +86,29 @@ describe("processor", () => {
         expect(proc.savePath).toBe("test.txt");
         expect(proc.max).toBe(0);
     });
+
+    test("WriteReplication falls back to its default values", async () => {
+        const helper = new ProcHelper<WriteReplication>();
+
+        await helper.importFile(resolve("./processor.ttl"));
+        await helper.importInline(
+            resolve("./pipeline.ttl"),
+            `
+        @prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+        <http://example.org/writer> a rdfc:WriteReplication;
+            rdfc:incoming <incoming>;
+            rdfc:savePath "test.txt".
+    `,
+        );
+        helper.getConfig("WriteReplication");
+
+        const proc = <WriteReplication & WriteReplicationArgs>(
+            await helper.getProcessor("http://example.org/writer")
+        );
+
+        expect(proc.savePath).toBe("test.txt");
+        expect(proc.append).toBe(false);
+        expect(proc.max).toBe(0);
+    });
 });
