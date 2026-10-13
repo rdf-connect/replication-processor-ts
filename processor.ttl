@@ -32,7 +32,8 @@ rdfc:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
         sh:minCount 0;
         sh:maxCount 1;
     ], [
-        sh:datatype xsd:string;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:codeType xsd:string;
         sh:path rdfc:savePath;
         sh:codeIdentifier "savePath";
         sh:name "Save path";
@@ -70,7 +71,8 @@ rdfc:ReadReplication rdfc:jsImplementationOf rdfc:Processor;
         sh:maxCount 1;
         sh:minCount 1;
       ], [
-        sh:datatype xsd:string;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:codeType xsd:string;
         sh:path rdfc:savePath;
         sh:codeIdentifier "savePath";
         sh:name "Save path";
