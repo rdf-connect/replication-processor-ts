@@ -2,6 +2,15 @@ import { Processor, Reader, Writer } from "@rdfc/js-runner";
 import { createReadStream, createWriteStream, type WriteStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
+import { fileURLToPath } from "node:url";
+
+/**
+ * A location can be written as an IRI in the pipeline, which reaches the
+ * processor as a `file:` URL: turn that into a path, keep anything else.
+ */
+export function toPath(location: string): string {
+    return location.startsWith("file:") ? fileURLToPath(location) : location;
+}
 
 /**
  * The WriteReplication processor is a processor which simply writes the
@@ -15,9 +24,9 @@ import { once } from "node:events";
  */
 export type WriteReplicationArgs = {
     incoming: Reader;
-    append?: boolean;
+    append: boolean;
     savePath: string;
-    max?: number;
+    max: number;
 };
 
 export class WriteReplication extends Processor<WriteReplicationArgs> {
@@ -25,11 +34,9 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
     private count: number = 0;
 
     async init(this: WriteReplicationArgs & this): Promise<void> {
-        this.writer = createWriteStream(
-            this.savePath.replace(/^file:\/\//, ""),
-            { flags: this.append ? "a" : "w" },
-        );
-        this.max ??= 0;
+        this.writer = createWriteStream(toPath(this.savePath), {
+            flags: this.append ? "a" : "w",
+        });
     }
 
     async transform(this: WriteReplicationArgs & this): Promise<void> {
@@ -80,9 +87,7 @@ export class ReadReplication extends Processor<ReadReplicationArgs> {
     private count: number;
 
     async init(this: ReadReplicationArgs & this): Promise<void> {
-        this.fileStream = createReadStream(
-            this.savePath.replace(/^file:\/\//, ""),
-        );
+        this.fileStream = createReadStream(toPath(this.savePath));
         this.count = 0;
         this.logger.info(
             `Initialized ReadReplication from file '${this.savePath}'.`,
