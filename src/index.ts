@@ -24,9 +24,12 @@ export type WriteReplicationArgs = {
 export class WriteReplication extends Processor<WriteReplicationArgs> {
     private writer: WriteStream;
     private count: number = 0;
+    // The file savePath names, which can be written as an IRI
+    private path: string;
 
     async init(this: WriteReplicationArgs & this): Promise<void> {
-        this.writer = createWriteStream(toPath(this.savePath), {
+        this.path = toPath(this.savePath);
+        this.writer = createWriteStream(this.path, {
             flags: this.append ? "a" : "w",
         });
     }
@@ -43,7 +46,7 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
 
             if (this.count % 1000 === 0) {
                 this.logger.verbose(
-                    `Already written ${this.count} members to '${this.savePath}'...`,
+                    `Already written ${this.count} members to '${this.path}'...`,
                 );
             }
 
@@ -77,12 +80,15 @@ export type ReadReplicationArgs = {
 export class ReadReplication extends Processor<ReadReplicationArgs> {
     private fileStream: ReturnType<typeof createReadStream>;
     private count: number;
+    // The file savePath names, which can be written as an IRI
+    private path: string;
 
     async init(this: ReadReplicationArgs & this): Promise<void> {
-        this.fileStream = createReadStream(toPath(this.savePath));
+        this.path = toPath(this.savePath);
+        this.fileStream = createReadStream(this.path);
         this.count = 0;
         this.logger.info(
-            `Initialized ReadReplication from file '${this.savePath}'.`,
+            `Initialized ReadReplication from file '${this.path}'.`,
         );
     }
 
@@ -92,14 +98,14 @@ export class ReadReplication extends Processor<ReadReplicationArgs> {
 
     async produce(this: ReadReplicationArgs & this): Promise<void> {
         this.logger.info(
-            `Producing members from file '${this.savePath}' to outgoing stream...`,
+            `Producing members from file '${this.path}' to outgoing stream...`,
         );
         const reader = createInterface({
             input: this.fileStream,
             crlfDelay: Infinity,
         });
         this.logger.info(
-            `Starting to push members from file '${this.savePath}' to outgoing stream...`,
+            `Starting to push members from file '${this.path}' to outgoing stream...`,
         );
         for await (const member of reader) {
             this.logger.info(member);

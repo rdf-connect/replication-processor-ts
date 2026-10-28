@@ -148,9 +148,14 @@ describe("processor", () => {
         const reader = <ReadReplication & ReadReplicationArgs>(
             await readHelper.getProcessor("http://example.org/reader")
         );
+        const info = vi.spyOn(reader.logger, "info");
         await reader.init();
         expect(createReadStream).toHaveBeenLastCalledWith(
             resolve("./my data.txt"),
+        );
+        // The logs name the file that is read, not the IRI
+        expect(info).toHaveBeenCalledWith(
+            `Initialized ReadReplication from file '${resolve("./my data.txt")}'.`,
         );
     });
 });
