@@ -2,7 +2,6 @@ import { Readable } from "stream";
 import { createReadStream, createWriteStream } from "node:fs";
 import { describe, expect, test, vi } from "vitest";
 import {
-    toPath,
     type ReadReplication,
     type ReadReplicationArgs,
     type WriteReplication,
@@ -152,14 +151,6 @@ describe("processor", () => {
         await reader.init();
         expect(createReadStream).toHaveBeenLastCalledWith(
             resolve("./my data.txt"),
-        );
-    });
-
-    test("toPath keeps paths and turns file: URLs into paths", () => {
-        expect(toPath("test.txt")).toBe("test.txt");
-        expect(toPath("/tmp/out.txt")).toBe("/tmp/out.txt");
-        expect(toPath("file:///tmp/my%20data/out.txt")).toBe(
-            "/tmp/my data/out.txt",
         );
     });
 });

@@ -2,15 +2,7 @@ import { Processor, Reader, Writer } from "@rdfc/js-runner";
 import { createReadStream, createWriteStream, type WriteStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
-import { fileURLToPath } from "node:url";
-
-/**
- * A location can be written as an IRI in the pipeline, which reaches the
- * processor as a `file:` URL: turn that into a path, keep anything else.
- */
-export function toPath(location: string): string {
-    return location.startsWith("file:") ? fileURLToPath(location) : location;
-}
+import { toPath } from "@rdfc/utils-js";
 
 /**
  * The WriteReplication processor is a processor which simply writes the
