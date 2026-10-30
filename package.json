@@ -22,7 +22,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
-    "@rdfc/js-runner": "^3.4.0",
+    "@rdfc/js-runner": "^3.4.1",
     "@types/jsonfile": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.72.1",
