@@ -2,6 +2,7 @@ import { Processor, Reader, Writer } from "@rdfc/js-runner";
 import { createReadStream, createWriteStream, type WriteStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
+import { toPath } from "@rdfc/utils-js";
 
 /**
  * The WriteReplication processor is a processor which simply writes the
@@ -15,21 +16,22 @@ import { once } from "node:events";
  */
 export type WriteReplicationArgs = {
     incoming: Reader;
-    append?: boolean;
+    append: boolean;
     savePath: string;
-    max?: number;
+    max: number;
 };
 
 export class WriteReplication extends Processor<WriteReplicationArgs> {
     private writer: WriteStream;
     private count: number = 0;
+    // The file savePath names, which can be written as an IRI
+    private path: string;
 
     async init(this: WriteReplicationArgs & this): Promise<void> {
-        this.writer = createWriteStream(
-            this.savePath.replace(/^file:\/\//, ""),
-            { flags: this.append ? "a" : "w" },
-        );
-        this.max ??= 0;
+        this.path = toPath(this.savePath);
+        this.writer = createWriteStream(this.path, {
+            flags: this.append ? "a" : "w",
+        });
     }
 
     async transform(this: WriteReplicationArgs & this): Promise<void> {
@@ -44,7 +46,7 @@ export class WriteReplication extends Processor<WriteReplicationArgs> {
 
             if (this.count % 1000 === 0) {
                 this.logger.verbose(
-                    `Already written ${this.count} members to '${this.savePath}'...`,
+                    `Already written ${this.count} members to '${this.path}'...`,
                 );
             }
 
@@ -78,14 +80,15 @@ export type ReadReplicationArgs = {
 export class ReadReplication extends Processor<ReadReplicationArgs> {
     private fileStream: ReturnType<typeof createReadStream>;
     private count: number;
+    // The file savePath names, which can be written as an IRI
+    private path: string;
 
     async init(this: ReadReplicationArgs & this): Promise<void> {
-        this.fileStream = createReadStream(
-            this.savePath.replace(/^file:\/\//, ""),
-        );
+        this.path = toPath(this.savePath);
+        this.fileStream = createReadStream(this.path);
         this.count = 0;
         this.logger.info(
-            `Initialized ReadReplication from file '${this.savePath}'.`,
+            `Initialized ReadReplication from file '${this.path}'.`,
         );
     }
 
@@ -95,14 +98,14 @@ export class ReadReplication extends Processor<ReadReplicationArgs> {
 
     async produce(this: ReadReplicationArgs & this): Promise<void> {
         this.logger.info(
-            `Producing members from file '${this.savePath}' to outgoing stream...`,
+            `Producing members from file '${this.path}' to outgoing stream...`,
         );
         const reader = createInterface({
             input: this.fileStream,
             crlfDelay: Infinity,
         });
         this.logger.info(
-            `Starting to push members from file '${this.savePath}' to outgoing stream...`,
+            `Starting to push members from file '${this.path}' to outgoing stream...`,
         );
         for await (const member of reader) {
             this.logger.info(member);
