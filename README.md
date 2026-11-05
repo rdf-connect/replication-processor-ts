@@ -9,15 +9,15 @@ A processor for the RDF Connect framework that writes an incoming stream to disk
 
 The `WriteReplication` processor can be configured using the following parameters:
 
-- `incoming`: The data stream which must be written to the text file.
-- `append`: Whether the data must be appended to the file or not. Default is false.
-- `savePath` (`string` or IRI): The path to the text file which must be written.
-- `max`: The maximum number of members to write to the file. If 0, all members are written. Default is 0.
+- `rdfcp:incoming`: The data stream which must be written to the text file.
+- `rdfcp:append`: Whether the data must be appended to the file or not. Default is false.
+- `rdfcp:savePath` (`string` or IRI): The path to the text file which must be written.
+- `rdfcp:max`: The maximum number of members to write to the file. If 0, all members are written. Default is 0.
 
 The `ReadReplication` processor can be configured using the following parameters:
 
-- `outgoing`: The data stream into which the data from the text file is written.
-- `savePath` (`string` or IRI): The path to the text file which must be read.
+- `rdfcp:outgoing`: The data stream into which the data from the text file is written.
+- `rdfcp:savePath` (`string` or IRI): The path to the text file which must be read.
 
 ## Installation
 
