@@ -21,11 +21,11 @@
 
 ### Define the processors
 <sender> a rdfcp:SendProcessorJs;
-         rdfcp:writer <input>;
+         rdfcp:output <input>;
          rdfcp:msg "Hello World!", "Hello World 2!", "Hello World!\n".
 
 <writer> a rdfcp:WriteReplication;
-    rdfcp:incoming <input>;
+    rdfcp:input <input>;
     rdfcp:append false;
     rdfcp:savePath <./replication-data.txt>;
     rdfcp:max 0.

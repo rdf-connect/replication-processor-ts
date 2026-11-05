@@ -33,13 +33,13 @@ const pipeline = `
         @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
         <http://example.org/writer> a rdfcp:WriteReplication;
-            rdfcp:incoming <incoming>;
+            rdfcp:input <incoming>;
             rdfcp:append false;
             rdfcp:savePath "test.txt";
             rdfcp:max 0.
 
         <http://example.org/reader> a rdfcp:ReadReplication;
-            rdfcp:outgoing <outgoing>;
+            rdfcp:output <outgoing>;
             rdfcp:savePath "test.txt".
     `;
 
@@ -100,7 +100,7 @@ describe("processor", () => {
         @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
         <http://example.org/writer> a rdfcp:WriteReplication;
-            rdfcp:incoming <incoming>;
+            rdfcp:input <incoming>;
             rdfcp:savePath "test.txt".
     `,
         );
@@ -121,11 +121,11 @@ describe("processor", () => {
         @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
         <http://example.org/writer> a rdfcp:WriteReplication;
-            rdfcp:incoming <incoming>;
+            rdfcp:input <incoming>;
             rdfcp:savePath <./my%20data.txt>.
 
         <http://example.org/reader> a rdfcp:ReadReplication;
-            rdfcp:outgoing <outgoing>;
+            rdfcp:output <outgoing>;
             rdfcp:savePath <./my%20data.txt>.
     `;
 
