@@ -21,10 +21,10 @@
 
 ### Define the processors
 <reader> a rdfcp:ReadReplication;
-    rdfcp:outgoing <output>;
+    rdfcp:output <output>;
     rdfcp:savePath <./replication-data.txt>.
 
 <logger> a rdfcp:LogProcessorJs;
-    rdfcp:reader <output>;
+    rdfcp:input <output>;
     rdfcp:level "info";
     rdfcp:label "output".

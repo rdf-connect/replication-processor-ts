@@ -17,9 +17,9 @@ rdfcp:WriteReplication rdfc:jsImplementationOf rdfc:Processor;
     sh:targetClass rdfcp:WriteReplication;
     sh:property [
         sh:class rdfc:Reader;
-        sh:path rdfcp:incoming;
+        sh:path rdfcp:input;
         sh:codeIdentifier "incoming";
-        sh:name "Incoming stream";
+        sh:name "Input channel";
         sh:description "Reader channel IRI that provides the data stream to be written to the text file.";
         sh:maxCount 1;
         sh:minCount 1;
@@ -65,9 +65,9 @@ rdfcp:ReadReplication rdfc:jsImplementationOf rdfc:Processor;
     sh:targetClass rdfcp:ReadReplication;
     sh:property [
         sh:class rdfc:Writer;
-        sh:path rdfcp:outgoing;
+        sh:path rdfcp:output;
         sh:codeIdentifier "outgoing";
-        sh:name "Outgoing stream";
+        sh:name "Output channel";
         sh:description "Writer channel IRI to which the data from the text file is written.";
         sh:maxCount 1;
         sh:minCount 1;
