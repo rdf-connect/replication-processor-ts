@@ -1,4 +1,5 @@
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 
 ### Import runners and processors
@@ -19,12 +20,12 @@
      ].
 
 ### Define the processors
-<sender> a rdfc:SendProcessorJs;
-         rdfc:writer <input>;
-         rdfc:msg "Hello World!", "Hello World 2!", "Hello World!\n".
+<sender> a rdfcp:SendProcessorJs;
+         rdfcp:writer <input>;
+         rdfcp:msg "Hello World!", "Hello World 2!", "Hello World!\n".
 
-<writer> a rdfc:WriteReplication;
-    rdfc:incoming <input>;
-    rdfc:append false;
-    rdfc:savePath <./replication-data.txt>;
-    rdfc:max 0.
+<writer> a rdfcp:WriteReplication;
+    rdfcp:incoming <input>;
+    rdfcp:append false;
+    rdfcp:savePath <./replication-data.txt>;
+    rdfcp:max 0.
