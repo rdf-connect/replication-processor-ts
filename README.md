@@ -36,16 +36,18 @@ npm install @rdfc/replication-processor-ts
 
 An example configuration of the processor can be found in the `example` directory.
 
-You can run this example by executing the following command:
+After building the processor (see above), you can run this example by executing the following commands:
 
 ```bash
-npx js-runner example/write-pipeline.ttl
-npx js-runner example/read-pipeline.ttl
+cd example
+npm install
+npx rdfc write-pipeline.ttl
+npx rdfc read-pipeline.ttl
 ```
 
 To enable all debug logs, add `DEBUG=*` before the command:
 
 ```bash
-DEBUG=* npx js-runner example/write-pipeline.ttl
-DEBUG=* npx js-runner example/read-pipeline.ttl
+DEBUG=* npx rdfc write-pipeline.ttl
+DEBUG=* npx rdfc read-pipeline.ttl
 ```
