@@ -1,4 +1,5 @@
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 
 ### Import runners and processors
@@ -19,11 +20,11 @@
    ].
 
 ### Define the processors
-<reader> a rdfc:ReadReplication;
-    rdfc:outgoing <output>;
-    rdfc:savePath <./replication-data.txt>.
+<reader> a rdfcp:ReadReplication;
+    rdfcp:output <output>;
+    rdfcp:savePath <./replication-data.txt>.
 
-<logger> a rdfc:LogProcessorJs;
-    rdfc:reader <output>;
-    rdfc:level "info";
-    rdfc:label "output".
+<logger> a rdfcp:LogProcessorJs;
+    rdfcp:input <output>;
+    rdfcp:level "info";
+    rdfcp:label "output".

@@ -9,15 +9,15 @@ A processor for the RDF Connect framework that writes an incoming stream to disk
 
 The `WriteReplication` processor can be configured using the following parameters:
 
-- `incoming`: The data stream which must be written to the text file.
-- `append`: Whether the data must be appended to the file or not. Default is false.
-- `savePath` (`string` or IRI): The path to the text file which must be written.
-- `max`: The maximum number of members to write to the file. If 0, all members are written. Default is 0.
+- `rdfcp:input`: The data stream which must be written to the text file.
+- `rdfcp:append`: Whether the data must be appended to the file or not. Default is false.
+- `rdfcp:savePath` (`string` or IRI): The path to the text file which must be written.
+- `rdfcp:max`: The maximum number of members to write to the file. If 0, all members are written. Default is 0.
 
 The `ReadReplication` processor can be configured using the following parameters:
 
-- `outgoing`: The data stream into which the data from the text file is written.
-- `savePath` (`string` or IRI): The path to the text file which must be read.
+- `rdfcp:output`: The data stream into which the data from the text file is written.
+- `rdfcp:savePath` (`string` or IRI): The path to the text file which must be read.
 
 ## Installation
 
@@ -36,16 +36,18 @@ npm install @rdfc/replication-processor-ts
 
 An example configuration of the processor can be found in the `example` directory.
 
-You can run this example by executing the following command:
+After building the processor (see above), you can run this example by executing the following commands:
 
 ```bash
-npx js-runner example/write-pipeline.ttl
-npx js-runner example/read-pipeline.ttl
+cd example
+npm install
+npx rdfc write-pipeline.ttl
+npx rdfc read-pipeline.ttl
 ```
 
 To enable all debug logs, add `DEBUG=*` before the command:
 
 ```bash
-DEBUG=* npx js-runner example/write-pipeline.ttl
-DEBUG=* npx js-runner example/read-pipeline.ttl
+DEBUG=* npx rdfc write-pipeline.ttl
+DEBUG=* npx rdfc read-pipeline.ttl
 ```

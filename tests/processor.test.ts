@@ -30,16 +30,17 @@ vi.mock("node:fs", async () => {
 
 const pipeline = `
         @prefix rdfc: <https://w3id.org/rdf-connect#>.
+        @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
-        <http://example.org/writer> a rdfc:WriteReplication;
-            rdfc:incoming <incoming>;
-            rdfc:append false;
-            rdfc:savePath "test.txt";
-            rdfc:max 0.
+        <http://example.org/writer> a rdfcp:WriteReplication;
+            rdfcp:input <incoming>;
+            rdfcp:append false;
+            rdfcp:savePath "test.txt";
+            rdfcp:max 0.
 
-        <http://example.org/reader> a rdfc:ReadReplication;
-            rdfc:outgoing <outgoing>;
-            rdfc:savePath "test.txt".
+        <http://example.org/reader> a rdfcp:ReadReplication;
+            rdfcp:output <outgoing>;
+            rdfcp:savePath "test.txt".
     `;
 
 describe("processor", () => {
@@ -96,10 +97,11 @@ describe("processor", () => {
             resolve("./pipeline.ttl"),
             `
         @prefix rdfc: <https://w3id.org/rdf-connect#>.
+        @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
-        <http://example.org/writer> a rdfc:WriteReplication;
-            rdfc:incoming <incoming>;
-            rdfc:savePath "test.txt".
+        <http://example.org/writer> a rdfcp:WriteReplication;
+            rdfcp:input <incoming>;
+            rdfcp:savePath "test.txt".
     `,
         );
         helper.getConfig("WriteReplication");
@@ -113,17 +115,18 @@ describe("processor", () => {
         expect(proc.max).toBe(0);
     });
 
-    test("rdfc:savePath can be written as an IRI", async () => {
+    test("rdfcp:savePath can be written as an IRI", async () => {
         const iriPipeline = `
         @prefix rdfc: <https://w3id.org/rdf-connect#>.
+        @prefix rdfcp: <https://w3id.org/rdf-connect/processors#>.
 
-        <http://example.org/writer> a rdfc:WriteReplication;
-            rdfc:incoming <incoming>;
-            rdfc:savePath <./my%20data.txt>.
+        <http://example.org/writer> a rdfcp:WriteReplication;
+            rdfcp:input <incoming>;
+            rdfcp:savePath <./my%20data.txt>.
 
-        <http://example.org/reader> a rdfc:ReadReplication;
-            rdfc:outgoing <outgoing>;
-            rdfc:savePath <./my%20data.txt>.
+        <http://example.org/reader> a rdfcp:ReadReplication;
+            rdfcp:output <outgoing>;
+            rdfcp:savePath <./my%20data.txt>.
     `;
 
         const writeHelper = new ProcHelper<WriteReplication>();
